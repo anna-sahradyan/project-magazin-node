@@ -31,7 +31,7 @@ app.get("/", (req, res) => {
         for (let i = 0; i < result.length; i++) {
             goods[result[i]['id']] = result[i];
         }
-        // console.log(JSON.parse(JSON.stringify(goods)))
+         console.log(JSON.parse(JSON.stringify(goods)))
         res.render("main.pug", {
             foo: 4,
             bar: 7,
@@ -66,18 +66,27 @@ app.get('/cat', (req, res) => {
     Promise.all([
         cat.catch((error) => error),
         goods.catch((error) => error),
-    ]).then(function ( values) {
+    ]).then(function (values) {
         console.log(values[0])
 
         res.render("cat.pug", {
-            cat:JSON.parse(JSON.stringify(values[0])),
-            goods:JSON.parse(JSON.stringify(values[1]))
+            cat: JSON.parse(JSON.stringify(values[0])),
+            goods: JSON.parse(JSON.stringify(values[1]))
         });
 
     })
 });
+//!part one goods
+app.get('/goods', (req, res) => {
+    console.log(req.query.id);
+    conn.query("SELECT *FROM goods WHERE id=" + req.query.id, (err, result, fields) => {
+        if (err) throw  err;
+        res.render("goods.pug",{
+            goods: JSON.parse(JSON.stringify(result))
+        })
 
-
+    });
+})
 
 app.listen(4000, () => {
     console.log("Backend is starting !!!")
