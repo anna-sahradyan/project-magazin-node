@@ -87,7 +87,14 @@ app.get('/goods', (req, res) => {
 
     });
 })
-
+//!part post fetch
+app.post("/get-category-list",(req,res)=> {
+    conn.query("SELECT id,category FROM category", (err, result, fields) => {
+        if (err) throw  err;
+        console.log(result)
+        res.json(result)
+    });
+});
 app.listen(4000, () => {
     console.log("Backend is starting !!!")
 });
