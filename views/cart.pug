@@ -7,12 +7,13 @@ div(class=' card-cont col col-md-4')
             class='card-images'
         )
         p(class='text-center') #{val['cost'].toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")}USD
-            ul(class='card-actions')
-                li
-                    button(
-                        data-goods_id=val['id']
-                        class='card-btn-add button button-primary add-to-cart'
-                    ) to cart
+        ul(class='card-actions')
+            li
+                button(
+                    data-goods_id=val['id']
+                    class='card-btn-add button button-primary add-to-cart'
+                ) to cart
+
 
 
 

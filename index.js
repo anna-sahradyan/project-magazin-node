@@ -4,6 +4,7 @@ const mysql = require('mysql');
 /**
  * public= name directory where save static
  */
+app.use(express.json())
 app.set("view engine", "pug");
 app.use(express.static("public"));
 
@@ -31,7 +32,7 @@ app.get("/", (req, res) => {
         for (let i = 0; i < result.length; i++) {
             goods[result[i]['id']] = result[i];
         }
-         console.log(JSON.parse(JSON.stringify(goods)))
+        console.log(JSON.parse(JSON.stringify(goods)))
         res.render("main.pug", {
             foo: 4,
             bar: 7,
@@ -81,19 +82,31 @@ app.get('/goods', (req, res) => {
     console.log(req.query.id);
     conn.query("SELECT *FROM goods WHERE id=" + req.query.id, (err, result, fields) => {
         if (err) throw  err;
-        res.render("goods.pug",{
+        res.render("goods.pug", {
             goods: JSON.parse(JSON.stringify(result))
         })
 
     });
 })
 //!part post fetch
-app.post("/get-category-list",(req,res)=> {
+app.post("/get-category-list", (req, res) => {
     conn.query("SELECT id,category FROM category", (err, result, fields) => {
         if (err) throw  err;
         console.log(result)
         res.json(result)
     });
+});
+app.post("/get-goods-info", (req, res) => {
+    conn.query("SELECT id,name,cost FROM goods WHERE  id IN (" + req.body.key.join(',') + " )", (err, result, fields) => {
+        if (err) throw  err;
+        console.log(result)
+        let goods = {};
+        for (let i = 0; i < result.length; i++) {
+            goods[result[i]['id']]=result[i]
+        }
+        res.json(goods)
+    });
+
 });
 app.listen(4000, () => {
     console.log("Backend is starting !!!")
