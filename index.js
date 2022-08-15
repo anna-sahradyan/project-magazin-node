@@ -1,6 +1,8 @@
 const express = require("express");
 const app = express();
 const mysql = require('mysql');
+const cors = require('cors');
+app.use(cors());
 /**
  * public= name directory where save static
  */
@@ -97,16 +99,20 @@ app.post("/get-category-list", (req, res) => {
     });
 });
 app.post("/get-goods-info", (req, res) => {
-    conn.query("SELECT id,name,cost FROM goods WHERE  id IN (" + req.body.key.join(',') + " )", (err, result, fields) => {
-        if (err) throw  err;
-        console.log(result)
-        let goods = {};
-        for (let i = 0; i < result.length; i++) {
-            goods[result[i]['id']]=result[i]
-        }
-        res.json(goods)
-    });
-
+    if(req.body.key.length!=0) {
+        conn.query("SELECT id, name, cost FROM goods WHERE  id IN  (" + req.body.key.join(",") + ")", (err, result, fields) => {
+            if (err) throw  err;
+            console.log(result)
+            let goods = {};
+            for (let i = 0; i < result.length; i++) {
+                goods[result[i]['id']] = result[i]
+            }
+            res.json(goods)
+        });
+    }
+    else{
+        res.send('0');
+    }
 });
 app.listen(4000, () => {
     console.log("Backend is starting !!!")

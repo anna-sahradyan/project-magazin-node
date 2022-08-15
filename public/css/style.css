@@ -28,6 +28,20 @@ body {
 }
 
 
+/*!navigation  site nav*/
+.site-nav {
+    width: 300px;
+    min-height: 100vh;
+    position: fixed;
+    /*left: -300px;*/
+    z-index: 999999;
+    top: 0;
+    padding: 10px;
+    transition: all ease 1s;
+    color: #fff;
+
+}
+
 .site-header {
     height: auto;
     padding: 20px 0;
@@ -38,17 +52,21 @@ body {
 
 }
 
+.site-nav a {
+    color: #424242;
+}
+
 .full-width {
     width: 100%;
     margin: 0 auto;
     padding: 0;
 }
 
-/*!block category*/
+/*!block category */
 .card-cont {
     position: relative;
     display: grid;
-    grid-template: 500px/repeat(3,400px);
+    grid-template: 500px/repeat(3, 400px);
     grid-auto-flow: column;
 }
 
@@ -88,19 +106,6 @@ body {
     font-size: 16px;
 }
 
-/*!navigation  */
-.site-nav {
-    width: 300px;
-    min-height: 100vh;
-    position: fixed;
-    left: -300px;
-    z-index: 999999;
-    top: 0;
-    padding: 10px;
-    transition: all ease 1s;
-    color: #ffffff;
-
-}
 
 .close-button-div {
     text-align: right;
