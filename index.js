@@ -25,23 +25,33 @@ conn.connect(err => {
 
 
 app.get("/", (req, res) => {
-    let query = "SELECT * FROM goods"
-    conn.query(query, (err, result) => {
-        if (err) {
-            throw err;
-        }
-        let goods = {};
-        for (let i = 0; i < result.length; i++) {
-            goods[result[i]['id']] = result[i];
-        }
-        console.log(JSON.parse(JSON.stringify(goods)))
-        res.render("main.pug", {
-            foo: 4,
-            bar: 7,
-            goods: JSON.parse(JSON.stringify(goods))
-        });
-
+    let cat = new Promise((resolve, reject) => {
+        conn.query(
+            "select id,name, cost, image, category from (select id,name,cost,image,category, if(if(@curr_category != category, @curr_category := category, '') != '', @k := 0, @k := @k + 1) as ind   from goods, ( select @curr_category := '' ) v ) goods where ind < 3",
+            (err, result, field) => {
+                if (err) {
+                    return reject(err);
+                }
+                resolve(result);
+            })
+    })
+    let catDescription = new Promise((resolve, reject) => {
+        conn.query(
+            "SELECT * FROM category",
+            (err, result, field) => {
+                if (err) {
+                    return reject(err);
+                }
+                resolve(result);
+            })
     });
+    Promise.all([cat, catDescription]).then((value) => {
+        console.log(value[0])
+        res.render("index.pug",{
+            goods: JSON.parse(JSON.stringify(value[0])),
+            cat: JSON.parse(JSON.stringify(value[1])),
+        })
+    })
 
 });
 
@@ -70,8 +80,6 @@ app.get('/cat', (req, res) => {
         cat.catch((error) => error),
         goods.catch((error) => error),
     ]).then(function (values) {
-        console.log(values[0])
-
         res.render("cat.pug", {
             cat: JSON.parse(JSON.stringify(values[0])),
             goods: JSON.parse(JSON.stringify(values[1]))
@@ -81,7 +89,6 @@ app.get('/cat', (req, res) => {
 });
 //!part one goods
 app.get('/goods', (req, res) => {
-    console.log(req.query.id);
     conn.query("SELECT *FROM goods WHERE id=" + req.query.id, (err, result, fields) => {
         if (err) throw  err;
         res.render("goods.pug", {
@@ -94,23 +101,20 @@ app.get('/goods', (req, res) => {
 app.post("/get-category-list", (req, res) => {
     conn.query("SELECT id,category FROM category", (err, result, fields) => {
         if (err) throw  err;
-        console.log(result)
         res.json(result)
     });
 });
 app.post("/get-goods-info", (req, res) => {
-    if(req.body.key.length!=0) {
+    if (req.body.key.length != 0) {
         conn.query("SELECT id, name, cost FROM goods WHERE  id IN  (" + req.body.key.join(",") + ")", (err, result, fields) => {
             if (err) throw  err;
-            console.log(result)
             let goods = {};
             for (let i = 0; i < result.length; i++) {
                 goods[result[i]['id']] = result[i]
             }
             res.json(goods)
         });
-    }
-    else{
+    } else {
         res.send('0');
     }
 });
