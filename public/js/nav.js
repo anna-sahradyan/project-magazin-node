@@ -1,5 +1,5 @@
-document.querySelector('.close-nav').onclick = closeNav;
-document.querySelector('.show-nav').onclick = showNav;
+if (document.querySelector('.close-nav')) document.querySelector('.close-nav').onclick = closeNav;
+if (document.querySelector('.show-nav')) document.querySelector('.show-nav').onclick = showNav;
 
 function closeNav() {
     document.querySelector('.site-nav').style.left = '-300px';
@@ -33,4 +33,4 @@ function showCategoryList(data) {
 
 }
 
-getCategoryList();
+if (document.querySelector('.show-nav')) getCategoryList();

@@ -47,7 +47,7 @@ app.get("/", (req, res) => {
     });
     Promise.all([cat, catDescription]).then((value) => {
         console.log(value[0])
-        res.render("index.pug",{
+        res.render("index.pug", {
             goods: JSON.parse(JSON.stringify(value[0])),
             cat: JSON.parse(JSON.stringify(value[1])),
         })
@@ -96,7 +96,13 @@ app.get('/goods', (req, res) => {
         })
 
     });
-})
+});
+app.get('/order', (req, res) => {
+    res.render('order.pug');
+
+});
+
+
 //!part post fetch
 app.post("/get-category-list", (req, res) => {
     conn.query("SELECT id,category FROM category", (err, result, fields) => {
@@ -117,6 +123,11 @@ app.post("/get-goods-info", (req, res) => {
     } else {
         res.send('0');
     }
+});
+//!part post fetch-3
+app.post("/finish-order", function (req, res) {
+    console.log(req.body);
+    res.send("1")
 });
 app.listen(4000, () => {
     console.log("Backend is starting !!!")
