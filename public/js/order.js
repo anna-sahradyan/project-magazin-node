@@ -5,10 +5,21 @@ document.querySelector("#shop-order").onsubmit = function (e) {
     let email = document.querySelector("#email").value.trim();
     let address = document.querySelector("#address").value.trim();
     if (!document.querySelector("#rule").checked) {
-
+        Swal.fire({
+            title: 'Warning',
+            text: 'Read and accept the rule',
+            type: 'info',
+            confirmButtonText: 'Ok'
+        });
+        return false
     }
     if (username === "" || phone === "" || email === "" || address === "") {
-
+        Swal.fire({
+            title: 'Warning',
+            text: 'Fill all fields',
+            type: 'info',
+            confirmButtonText: 'Ok'
+        });
     }
     fetch("/finish-order", {
         method: "POST",
@@ -28,9 +39,19 @@ document.querySelector("#shop-order").onsubmit = function (e) {
         return response.text();
     }).then(function (body) {
         if (body === '1') {
-
+            Swal.fire({
+                title: 'Success',
+                text: 'Success',
+                type: 'info',
+                confirmButtonText: 'Ok'
+            });
         } else {
-
+            Swal.fire({
+                title: 'Problem with mail',
+                text: 'Error',
+                type: 'error',
+                confirmButtonText: 'Ok'
+            });
         }
     })
 

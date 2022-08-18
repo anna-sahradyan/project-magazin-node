@@ -16,7 +16,9 @@
     "mustard-ui": "^1.0.4",
     "mysql": "^2.18.1",
     "nodemon": "^2.0.19",
-    "pug": "^3.0.2"
+    "pug": "^3.0.2",
+    "sweetalert2": "^11.4.28"
   },
   "description": ""
 }
+
