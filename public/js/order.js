@@ -20,6 +20,7 @@ document.querySelector("#shop-order").onsubmit = function (e) {
             type: 'info',
             confirmButtonText: 'Ok'
         });
+        return false;
     }
     fetch("/finish-order", {
         method: "POST",

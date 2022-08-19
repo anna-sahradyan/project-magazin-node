@@ -10,6 +10,7 @@ app.use(express.json())
 app.set("view engine", "pug");
 app.use(express.static("public"));
 
+const nodemailer = require('nodemailer');
 const conn = mysql.createConnection({
     host: "localhost", user: "root", database: "market", password: "mysql1972", port: 3306
 
@@ -127,9 +128,9 @@ app.post("/get-goods-info", (req, res) => {
 //!part post fetch-3
 app.post('/finish-order', function (req, res) {
     console.log(req.body);
-    if (req.body.key.length !== 0) {
+    if (req.body.key.length != 0) {
         let key = Object.keys(req.body.key);
-        con.query(
+        conn.query(
             'SELECT id,name,cost FROM goods WHERE id IN (' + key.join(',') + ')',
             function (error, result, fields) {
                 if (error) throw error;
@@ -143,8 +144,45 @@ app.post('/finish-order', function (req, res) {
     }
 });
 
-function sendMail(data,result) {
-console.log(result)
+async function sendMail(data, result) {
+    let res = '<h2>Order in lite shop</h2>';
+    let total = 0;
+    for (let i = 0; i < result.length; i++) {
+        res += `<p>${result[i]['name']} - ${data.key[result[i]['id']]} - ${result[i]['cost'] * data.key[result[i]['id']]} uah</p>`;
+        total += result[i]['cost'] * data.key[result[i]['id']];
+    }
+    console.log(res);
+    res += '<hr>';
+    res += `Total ${total} uah`;
+    res += `<hr>Phone: ${data.phone}`;
+    res += `<hr>Username: ${data.username}`;
+    res += `<hr>Address: ${data.address}`;
+    res += `<hr>Email: ${data.email}`;
+
+    let testAccount = await nodemailer.createTestAccount();
+
+    let transporter = nodemailer.createTransport({
+        host: "smtp.ethereal.email",
+        port: 587,
+        secure: false, // true for 465, false for other ports
+        auth: {
+            user: testAccount.user, // generated ethereal user
+            pass: testAccount.pass // generated ethereal password
+        }
+    });
+
+    let mailOption = {
+        from: '<l@gmail.com>',
+        to: "l@gmail.com," + data.email,
+        subject: "shop order",
+        text: 'Hello world',
+        html: res
+    };
+
+    let info = await transporter.sendMail(mailOption);
+    console.log("MessageSent: %s", info.messageId);
+    console.log("PreviewSent: %s", nodemailer.getTestMessageUrl(info));
+    return true;
 }
 
 app.listen(4000, () => {
