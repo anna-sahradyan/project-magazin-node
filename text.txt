@@ -1,0 +1,6 @@
+//let info = `( '"+data.username+"','"+data.phone+"','"+data.email+"','"+data.address+"',)`
+process.env["NODE_TLS_REJECT_UNAUTHORIZED"]=0;
+  conn.query(sql, (error, result) => {
+        if(error)throw error;
+        console.log('1 user info save')
+    })

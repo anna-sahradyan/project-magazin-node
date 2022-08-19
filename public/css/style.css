@@ -27,6 +27,34 @@ body {
 
 }
 
+/*scroll cart-nav*/
+#cart-nav {
+    background-color:lightgreen;
+    width: 100%;
+    height: 300px;
+    overflow-y: scroll;
+
+}
+
+/*#cart-nav::-webkit-scrollbar-track {*/
+/*    !*background-image: url(../../public/img/reng.png);*!*/
+/*    !*background-repeat: no-repeat;*!*/
+/*    overflow: auto;*/
+/*    height: 300px;*/
+/*    margin-block: 4.5em;*/
+/*    background-position: top 0 left 30px;*/
+
+
+/*}*/
+
+/*#cart-nav::-webkit-scrollbar-thumb {*/
+/*    background-color: #808080;*/
+/*    border-radius: 70px;*/
+/*    padding: 2px;*/
+/*    cursor: pointer !important;*/
+/*}*/
+
+
 
 /*!navigation  site nav*/
 .site-nav {

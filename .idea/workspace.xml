@@ -4,9 +4,9 @@
     <list default="true" id="44590892-e642-4971-acf1-933a7b01572a" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/css/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/css/style.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/js/order.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/js/order.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/views/footer.pug" beforeDir="false" afterPath="$PROJECT_DIR$/views/footer.pug" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/views/header.pug" beforeDir="false" afterPath="$PROJECT_DIR$/views/header.pug" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/views/nav.pug" beforeDir="false" afterPath="$PROJECT_DIR$/views/nav.pug" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/views/order.pug" beforeDir="false" afterPath="$PROJECT_DIR$/views/order.pug" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -46,7 +46,7 @@
       <workItem from="1660767032505" duration="594000" />
       <workItem from="1660799091387" duration="1599000" />
       <workItem from="1660802998291" duration="8805000" />
-      <workItem from="1660889540388" duration="4878000" />
+      <workItem from="1660889540388" duration="21130000" />
     </task>
     <servers />
   </component>

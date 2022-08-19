@@ -23,7 +23,7 @@ conn.connect(err => {
         console.log('Database is OK!!!')
     }
 });
-
+process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
 
 app.get("/", (req, res) => {
     let cat = new Promise((resolve, reject) => {
@@ -47,7 +47,6 @@ app.get("/", (req, res) => {
             })
     });
     Promise.all([cat, catDescription]).then((value) => {
-        console.log(value[0])
         res.render("index.pug", {
             goods: JSON.parse(JSON.stringify(value[0])),
             cat: JSON.parse(JSON.stringify(value[1])),
@@ -127,7 +126,6 @@ app.post("/get-goods-info", (req, res) => {
 });
 //!part post fetch-3
 app.post('/finish-order', function (req, res) {
-    console.log(req.body);
     if (req.body.key.length != 0) {
         let key = Object.keys(req.body.key);
         conn.query(
@@ -136,29 +134,40 @@ app.post('/finish-order', function (req, res) {
                 if (error) throw error;
                 console.log(result);
                 sendMail(req.body, result).catch(console.error);
+                saveOrder(req.body, result);
                 res.send('1');
             });
-    }
-    else {
+    } else {
         res.send('0');
     }
 });
 
+function saveOrder(data, result) {
+    let sql = "INSERT INTO user_info(user_name,user_phone,user_email,address) VALUES ( '" + data.username + "','" + data.phone + "','" + data.email + "','" + data.address + "')";
+    conn.query(sql, (error, result) => {
+        let userId = result.insertId;
+        if (error) throw error;
+        console.log('1 user info save');
+
+
+    });
+}
+
 async function sendMail(data, result) {
-    let res = '<h2>Order in lite shop</h2>';
+    let res = '<h2>Order in My Shop</h2>';
     let total = 0;
     for (let i = 0; i < result.length; i++) {
-        res += `<p>${result[i]['name']} - ${data.key[result[i]['id']]} - ${result[i]['cost'] * data.key[result[i]['id']]} uah</p>`;
+        res += `<p>${result[i]['name']} - ${data.key[result[i]['id']]} - ${result[i]['cost'] * data.key[result[i]['id']]} usd</p>`;
         total += result[i]['cost'] * data.key[result[i]['id']];
     }
-    console.log(res);
+    console.log(result);
     res += '<hr>';
     res += `Total ${total} uah`;
     res += `<hr>Phone: ${data.phone}`;
     res += `<hr>Username: ${data.username}`;
     res += `<hr>Address: ${data.address}`;
     res += `<hr>Email: ${data.email}`;
-
+    console.log(res);
     let testAccount = await nodemailer.createTestAccount();
 
     let transporter = nodemailer.createTransport({
@@ -172,7 +181,7 @@ async function sendMail(data, result) {
     });
 
     let mailOption = {
-        from: '<l@gmail.com>',
+        from: `<l@gmail.com>`,
         to: "l@gmail.com," + data.email,
         subject: "shop order",
         text: 'Hello world',
