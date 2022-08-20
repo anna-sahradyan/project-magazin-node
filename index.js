@@ -141,6 +141,36 @@ app.post('/finish-order', function (req, res) {
         res.send('0');
     }
 });
+//!block order admin
+app.get('/admin', (req, res) => {
+    res.render('admin.pug', {})
+});
+//!admin-order
+app.get('/admin-order', (req, res) => {
+    conn.query(`SELECT 
+shop_order.id as id,
+shop_order.user_id as user_id,
+shop_order.goods_id as goods_id,
+shop_order.goods_cost as goods_cost,
+shop_order.goods_amount as goods_amount,
+shop_order.total as total,
+from_unixtime(date,'%y-%m-%d %h:%m ') as human_date,
+user_info.user_name as user,
+user_info.user_phone as phone,
+user_info.address as address 
+
+ FROM
+ market.shop_order
+ LEFT JOIN 
+    user_info
+ON shop_order.user_id = user_info.id  ORDER BY id  DESC `, (err, result, fields) => {
+        if (err) throw  err;
+        res.render("admin-order.pug", {
+            order: JSON.parse(JSON.stringify(result))
+        })
+
+    });
+});
 
 function saveOrder(data, result) {
     let sql = "INSERT INTO user_info(user_name,user_phone,user_email,address) VALUES ( '" + data.username + "','" + data.phone + "','" + data.email + "','" + data.address + "')";
@@ -153,6 +183,7 @@ function saveOrder(data, result) {
             sql = "INSERT INTO shop_order (date, user_id, goods_id, goods_cost, goods_amount, total) VALUES (" + date + "," + userId + "," + result[i]['id'] + ", " + result[i]['cost'] + "," + data.key[result[i]['id']] + ", " + data.key[result[i]['id']] * result[i]['cost'] + ")";
             conn.query(sql, (err, resultQuery) => {
                 if (err) throw err;
+                console.log(resultQuery)
             })
         }
 
