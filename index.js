@@ -12,7 +12,11 @@ app.use(express.static("public"));
 
 const nodemailer = require('nodemailer');
 const conn = mysql.createConnection({
-    host: "localhost", user: "root", database: "market", password: "mysql1972", port: 3306
+    host: "localhost",
+    user: "root",
+    database: "market",
+    password: "mysql1972",
+    port: 3306
 
 })
 conn.connect(err => {
@@ -145,6 +149,10 @@ app.post('/finish-order', function (req, res) {
 app.get('/admin', (req, res) => {
     res.render('admin.pug', {})
 });
+app.post('/login', (req, res) => {
+    res.end('work')
+    console.log(req.body)
+});
 //!admin-order
 app.get('/admin-order', (req, res) => {
     conn.query(`SELECT 
@@ -171,7 +179,11 @@ ON shop_order.user_id = user_info.id  ORDER BY id  DESC `, (err, result, fields)
 
     });
 });
+app.get('/login', (req, res) => {
+    res.render('login.pug', {})
+});
 
+//!part saveOrder and sendMail
 function saveOrder(data, result) {
     let sql = "INSERT INTO user_info(user_name,user_phone,user_email,address) VALUES ( '" + data.username + "','" + data.phone + "','" + data.email + "','" + data.address + "')";
     conn.query(sql, (error, resultQuery) => {
