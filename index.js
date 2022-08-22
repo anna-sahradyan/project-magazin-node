@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const mysql = require('mysql');
 const cors = require('cors');
+
 app.use(cors());
 /**
  * public= name directory where save static
@@ -9,14 +10,11 @@ app.use(cors());
 app.use(express.json())
 app.set("view engine", "pug");
 app.use(express.static("public"));
+app.use(express.urlencoded());
 
 const nodemailer = require('nodemailer');
 const conn = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    database: "market",
-    password: "mysql1972",
-    port: 3306
+    host: "localhost", user: "root", database: "market", password: "mysql1972", port: 3306
 
 })
 conn.connect(err => {
@@ -31,29 +29,24 @@ process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
 
 app.get("/", (req, res) => {
     let cat = new Promise((resolve, reject) => {
-        conn.query(
-            "select id,name, cost, image, category from (select id,name,cost,image,category, if(if(@curr_category != category, @curr_category := category, '') != '', @k := 0, @k := @k + 1) as ind   from goods, ( select @curr_category := '' ) v ) goods where ind < 3",
-            (err, result, field) => {
-                if (err) {
-                    return reject(err);
-                }
-                resolve(result);
-            })
+        conn.query("select id,name, cost, image, category from (select id,name,cost,image,category, if(if(@curr_category != category, @curr_category := category, '') != '', @k := 0, @k := @k + 1) as ind   from goods, ( select @curr_category := '' ) v ) goods where ind < 3", (err, result, field) => {
+            if (err) {
+                return reject(err);
+            }
+            resolve(result);
+        })
     })
     let catDescription = new Promise((resolve, reject) => {
-        conn.query(
-            "SELECT * FROM category",
-            (err, result, field) => {
-                if (err) {
-                    return reject(err);
-                }
-                resolve(result);
-            })
+        conn.query("SELECT * FROM category", (err, result, field) => {
+            if (err) {
+                return reject(err);
+            }
+            resolve(result);
+        })
     });
     Promise.all([cat, catDescription]).then((value) => {
         res.render("index.pug", {
-            goods: JSON.parse(JSON.stringify(value[0])),
-            cat: JSON.parse(JSON.stringify(value[1])),
+            goods: JSON.parse(JSON.stringify(value[0])), cat: JSON.parse(JSON.stringify(value[1])),
         })
     })
 
@@ -80,13 +73,9 @@ app.get('/cat', (req, res) => {
             resolve(result);
         });
     });
-    Promise.all([
-        cat.catch((error) => error),
-        goods.catch((error) => error),
-    ]).then(function (values) {
+    Promise.all([cat.catch((error) => error), goods.catch((error) => error),]).then(function (values) {
         res.render("cat.pug", {
-            cat: JSON.parse(JSON.stringify(values[0])),
-            goods: JSON.parse(JSON.stringify(values[1]))
+            cat: JSON.parse(JSON.stringify(values[0])), goods: JSON.parse(JSON.stringify(values[1]))
         });
 
     })
@@ -132,15 +121,13 @@ app.post("/get-goods-info", (req, res) => {
 app.post('/finish-order', function (req, res) {
     if (req.body.key.length != 0) {
         let key = Object.keys(req.body.key);
-        conn.query(
-            'SELECT id,name,cost FROM goods WHERE id IN (' + key.join(',') + ')',
-            function (error, result, fields) {
-                if (error) throw error;
-                console.log(result);
-                sendMail(req.body, result).catch(console.error);
-                saveOrder(req.body, result);
-                res.send('1');
-            });
+        conn.query('SELECT id,name,cost FROM goods WHERE id IN (' + key.join(',') + ')', function (error, result, fields) {
+            if (error) throw error;
+            console.log(result);
+            sendMail(req.body, result).catch(console.error);
+            saveOrder(req.body, result);
+            res.send('1');
+        });
     } else {
         res.send('0');
     }
@@ -149,29 +136,25 @@ app.post('/finish-order', function (req, res) {
 app.get('/admin', (req, res) => {
     res.render('admin.pug', {})
 });
-app.post('/login', (req, res) => {
-    res.end('work')
-    console.log(req.body)
-});
 //!admin-order
 app.get('/admin-order', (req, res) => {
-    conn.query(`SELECT 
-shop_order.id as id,
-shop_order.user_id as user_id,
-shop_order.goods_id as goods_id,
-shop_order.goods_cost as goods_cost,
-shop_order.goods_amount as goods_amount,
-shop_order.total as total,
-from_unixtime(date,'%y-%m-%d %h:%m ') as human_date,
-user_info.user_name as user,
+    conn.query(`SELECT shop_order.id                          as id,
+                       shop_order.user_id                     as user_id,
+                       shop_order.goods_id                    as goods_id,
+                       shop_order.goods_cost                  as goods_cost,
+                       shop_order.goods_amount                as goods_amount,
+                       shop_order.total                       as total,
+                       from_unixtime(date, '%y-%m-%d %h:%m ') as human_date,
+                       user_info.user_name as user,
 user_info.user_phone as phone,
-user_info.address as address 
+user_info.address as address
 
- FROM
- market.shop_order
- LEFT JOIN 
-    user_info
-ON shop_order.user_id = user_info.id  ORDER BY id  DESC `, (err, result, fields) => {
+                FROM
+                    market.shop_order
+                    LEFT JOIN
+                    user_info
+                ON shop_order.user_id = user_info.id
+                ORDER BY id DESC `, (err, result, fields) => {
         if (err) throw  err;
         res.render("admin-order.pug", {
             order: JSON.parse(JSON.stringify(result))
@@ -179,9 +162,71 @@ ON shop_order.user_id = user_info.id  ORDER BY id  DESC `, (err, result, fields)
 
     });
 });
+//!login form **************************
 app.get('/login', (req, res) => {
     res.render('login.pug', {})
 });
+app.post('/login', (req, res) => {
+    console.log("**********************");
+    console.log(req.body);
+    console.log(req.body.login);
+    console.log(req.body.password);
+    console.log("**********************");
+    conn.query('SELECT * FROM user_login WHERE  login ="' + req.body.login + '"and password = "' + req.body.password + '"', (error, result) => {
+        if (error) console.error;
+        if (result.length === 0) {
+            console.log('error user not found');
+            res.redirect("/login")
+        } else {
+            result = JSON.parse(JSON.stringify(result));
+            res.cookie("hash", "jjjjjjjj");
+            /*
+            write hash to db
+             */
+            sql = "UPDATE user_login SET  hash = 'jjjjjj' WHERE id= " + result[0]['id'];
+            conn.query(sql, (error, resultQuery) => {
+                if (error) throw error;
+                res.redirect("/admin")
+            });
+        }
+
+
+    });
+});
+
+
+//
+// app.post('/login', function (req, res) {
+//     console.log('=======================');
+//     console.log(req.body.login);
+//     console.log(req.body.password);
+//     console.log('=======================');
+//     conn.query(
+//         'SELECT * FROM user_login WHERE login="' + req.body.login + '" and password="' + req.body.password + '"',
+//         function (error, result) {
+//             if (error) reject(error);
+//             console.log(result);
+//             console.log(result.length);
+//             if (result.length == 0) {
+//                 console.log('error user not found');
+//                 res.redirect('/login');
+//             }
+//             else {
+//                 result = JSON.parse(JSON.stringify(result));
+//                 res.cookie('hash', 'blablabla');
+//                 /**
+//                  * write hash to db
+//                  */
+//                 sql = "UPDATE user_login  SET hash='blablabla' WHERE id=" + result[0]['id'];
+//                 conn.query(sql, function (error, resultQuery) {
+//                     if (error) throw error;
+//                     res.redirect('/login');
+//                 });
+//
+//
+//             };
+//         });
+// });
 
 //!part saveOrder and sendMail
 function saveOrder(data, result) {
@@ -220,9 +265,7 @@ async function sendMail(data, result) {
     let testAccount = await nodemailer.createTestAccount();
 
     let transporter = nodemailer.createTransport({
-        host: "smtp.ethereal.email",
-        port: 587,
-        secure: false, // true for 465, false for other ports
+        host: "smtp.ethereal.email", port: 587, secure: false, // true for 465, false for other ports
         auth: {
             user: testAccount.user, // generated ethereal user
             pass: testAccount.pass // generated ethereal password
@@ -230,11 +273,7 @@ async function sendMail(data, result) {
     });
 
     let mailOption = {
-        from: `<l@gmail.com>`,
-        to: "l@gmail.com," + data.email,
-        subject: "shop order",
-        text: 'Hello world',
-        html: res
+        from: `<l@gmail.com>`, to: "l@gmail.com," + data.email, subject: "shop order", text: 'Hello world', html: res
     };
 
     let info = await transporter.sendMail(mailOption);
