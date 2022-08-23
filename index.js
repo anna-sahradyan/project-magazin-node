@@ -2,8 +2,10 @@ const express = require("express");
 const app = express();
 const mysql = require('mysql');
 const cors = require('cors');
-
+const cookieParser = require('cookie-parser');
+const admin = require("./public/js/admin");
 app.use(cors());
+
 /**
  * public= name directory where save static
  */
@@ -11,12 +13,21 @@ app.use(express.json())
 app.set("view engine", "pug");
 app.use(express.static("public"));
 app.use(express.urlencoded());
-
+app.use(cookieParser())
 const nodemailer = require('nodemailer');
+
 const conn = mysql.createConnection({
     host: "localhost", user: "root", database: "market", password: "mysql1972", port: 3306
 
-})
+});
+app.use(function (req, res, next) {
+    if (req.originalUrl == '/admin' || req.originalUrl == '/admin-order') {
+        admin(req, res, conn, next);
+    }
+    else {
+        next();
+    }
+});
 conn.connect(err => {
     if (err) {
         console.log(err);
@@ -132,36 +143,71 @@ app.post('/finish-order', function (req, res) {
         res.send('0');
     }
 });
-//!block order admin
-app.get('/admin', (req, res) => {
-    res.render('admin.pug', {})
+//!block  admin
+// app.get('/admin', (req, res) => {
+//     admin(req,res,conn,"admin.pug");
+//
+// });
+app.get('/admin', function (req, res) {
+    admin(req,res,conn,function (){
+        res.render('admin.pug', {});
+    })
+
 });
+
+
 //!admin-order
-app.get('/admin-order', (req, res) => {
-    conn.query(`SELECT shop_order.id                          as id,
-                       shop_order.user_id                     as user_id,
-                       shop_order.goods_id                    as goods_id,
-                       shop_order.goods_cost                  as goods_cost,
-                       shop_order.goods_amount                as goods_amount,
-                       shop_order.total                       as total,
-                       from_unixtime(date, '%y-%m-%d %h:%m ') as human_date,
-                       user_info.user_name as user,
-user_info.user_phone as phone,
-user_info.address as address
-
-                FROM
-                    market.shop_order
-                    LEFT JOIN
-                    user_info
-                ON shop_order.user_id = user_info.id
-                ORDER BY id DESC `, (err, result, fields) => {
-        if (err) throw  err;
-        res.render("admin-order.pug", {
-            order: JSON.parse(JSON.stringify(result))
-        })
-
+// app.get('/admin-order', (req, res) => {
+//     admin(req,res,conn,function (){
+//         conn.query(`SELECT shop_order.id                          as id,
+//                        shop_order.user_id                     as user_id,
+//                        shop_order.goods_id                    as goods_id,
+//                        shop_order.goods_cost                  as goods_cost,
+//                        shop_order.goods_amount                as goods_amount,
+//                        shop_order.total                       as total,
+//                        from_unixtime(date, '%y-%m-%d %h:%m ') as human_date,
+//                        user_info.user_name as user,
+// user_info.user_phone as phone,
+// user_info.address as address
+//
+//                 FROM
+//                     market.shop_order
+//                     LEFT JOIN
+//                     user_info
+//                 ON shop_order.user_id = user_info.id
+//                 ORDER BY id DESC `, (err, result, fields) => {
+//             if (err) throw  err;
+//             res.render("admin-order.pug", {
+//                 order: JSON.parse(JSON.stringify(result))
+//             })
+//
+//         });
+//     })
+//
+// });
+app.get('/admin-order', function (req, res) {
+    conn.query(`SELECT 
+      shop_order.id as id,
+      shop_order.user_id as user_id,
+        shop_order.goods_id as goods_id,
+        shop_order.goods_cost as goods_cost,
+        shop_order.goods_amount as goods_amount,
+        shop_order.total as total,
+        from_unixtime(date,"%Y-%m-%d %h:%m") as human_date,
+        user_info.user_name as user,
+        user_info.user_phone as phone,
+        user_info.address as address
+    FROM 
+      shop_order
+    LEFT JOIN	
+      user_info
+    ON shop_order.user_id = user_info.id ORDER BY id DESC`, function (error, result, fields) {
+        if (error) throw error;
+        console.log(result);
+        res.render('admin-order', { order: JSON.parse(JSON.stringify(result)) });
     });
 });
+
 //!login form **************************
 app.get('/login', (req, res) => {
     res.render('login.pug', {})
@@ -179,11 +225,9 @@ app.post('/login', (req, res) => {
             res.redirect("/login")
         } else {
             result = JSON.parse(JSON.stringify(result));
-            res.cookie("hash", "jjjjjjjj");
-            /*
-            write hash to db
-             */
-            sql = "UPDATE user_login SET  hash = 'jjjjjj' WHERE id= " + result[0]['id'];
+            res.cookie("hash", "llllllll");
+            res.cookie("id", result[0]['id']);
+            sql = "UPDATE user_login SET  hash = 'lllllll' WHERE id= " + result[0]['id'];
             conn.query(sql, (error, resultQuery) => {
                 if (error) throw error;
                 res.redirect("/admin")
@@ -194,39 +238,6 @@ app.post('/login', (req, res) => {
     });
 });
 
-
-//
-// app.post('/login', function (req, res) {
-//     console.log('=======================');
-//     console.log(req.body.login);
-//     console.log(req.body.password);
-//     console.log('=======================');
-//     conn.query(
-//         'SELECT * FROM user_login WHERE login="' + req.body.login + '" and password="' + req.body.password + '"',
-//         function (error, result) {
-//             if (error) reject(error);
-//             console.log(result);
-//             console.log(result.length);
-//             if (result.length == 0) {
-//                 console.log('error user not found');
-//                 res.redirect('/login');
-//             }
-//             else {
-//                 result = JSON.parse(JSON.stringify(result));
-//                 res.cookie('hash', 'blablabla');
-//                 /**
-//                  * write hash to db
-//                  */
-//                 sql = "UPDATE user_login  SET hash='blablabla' WHERE id=" + result[0]['id'];
-//                 conn.query(sql, function (error, resultQuery) {
-//                     if (error) throw error;
-//                     res.redirect('/login');
-//                 });
-//
-//
-//             };
-//         });
-// });
 
 //!part saveOrder and sendMail
 function saveOrder(data, result) {
