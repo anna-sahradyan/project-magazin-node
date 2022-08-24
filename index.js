@@ -21,7 +21,7 @@ const conn = mysql.createConnection({
 
 });
 app.use(function (req, res, next) {
-    if (req.originalUrl == '/admin' || req.originalUrl == '/admin-order') {
+    if (req.originalUrl === '/admin' || req.originalUrl === '/admin-order') {
         admin(req, res, conn, next);
     }
     else {
@@ -144,17 +144,10 @@ app.post('/finish-order', function (req, res) {
     }
 });
 //!block  admin
-// app.get('/admin', (req, res) => {
-//     admin(req,res,conn,"admin.pug");
-//
-// });
-app.get('/admin', function (req, res) {
-    admin(req,res,conn,function (){
-        res.render('admin.pug', {});
-    })
+app.get('/admin', (req, res) => {
+    res.render('admin.pug', {});
 
 });
-
 
 //!admin-order
 // app.get('/admin-order', (req, res) => {
@@ -204,7 +197,7 @@ app.get('/admin-order', function (req, res) {
     ON shop_order.user_id = user_info.id ORDER BY id DESC`, function (error, result, fields) {
         if (error) throw error;
         console.log(result);
-        res.render('admin-order', { order: JSON.parse(JSON.stringify(result)) });
+        res.render('admin-order.pug', { order: JSON.parse(JSON.stringify(result)) });
     });
 });
 
@@ -219,21 +212,21 @@ app.post('/login', (req, res) => {
     console.log(req.body.password);
     console.log("**********************");
     conn.query('SELECT * FROM user_login WHERE  login ="' + req.body.login + '"and password = "' + req.body.password + '"', (error, result) => {
-        if (error) console.error;
+        if (error) throw error;
         if (result.length === 0) {
             console.log('error user not found');
             res.redirect("/login")
         } else {
             result = JSON.parse(JSON.stringify(result));
-            res.cookie("hash", "llllllll");
+            let hash =makeHash(32)
+            res.cookie("hash", hash);
             res.cookie("id", result[0]['id']);
-            sql = "UPDATE user_login SET  hash = 'lllllll' WHERE id= " + result[0]['id'];
+            sql = "UPDATE user_login SET  hash = '"+hash+"' WHERE id= " + result[0]['id'];
             conn.query(sql, (error, resultQuery) => {
                 if (error) throw error;
                 res.redirect("/admin")
             });
-        }
-
+        };
 
     });
 });
@@ -292,6 +285,17 @@ async function sendMail(data, result) {
     console.log("PreviewSent: %s", nodemailer.getTestMessageUrl(info));
     return true;
 }
+//!make hash
+function makeHash(length) {
+    let result = '';
+    let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let charactersLength = characters.length;
+    for (let i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+}
+
 
 app.listen(4000, () => {
     console.log("Backend is starting !!!")
