@@ -1,12 +1,12 @@
 div(class=' card-cont col col-md-4')
     div(class='card')
-        a(href="goods?id="+ val["id"])
-        h3(class='card-title text-center') #{val['name']}
-        img(
-            src='e-commerce/' + val['image']
-            class='card-images'
-        )
-        p(class='text-center') #{val['cost'].toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")}USD
+        a(href="goods/"+ val["slug"])
+              h3(class='card-title text-center') #{val['name']}
+              img(
+                  src='e-commerce/' + val['image']
+                  class='card-images'
+              )
+              p(class='text-center') #{val['cost'].toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")}USD
         ul(class='card-actions')
             li
                 button(
