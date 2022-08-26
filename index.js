@@ -84,7 +84,7 @@ app.get('/cat', (req, res) => {
             resolve(result);
         });
     });
-    Promise.all([cat.catch((error) => error), goods.catch((error) => error),]).then(function (values) {
+    Promise.all([cat.catch((error) => error), goods.catch((error) => error)]).then(function (values) {
         res.render("cat.pug", {
             cat: JSON.parse(JSON.stringify(values[0])), goods: JSON.parse(JSON.stringify(values[1]))
         });
@@ -94,14 +94,21 @@ app.get('/cat', (req, res) => {
 //!part one goods
 app.get('/goods/*', (req, res) => {
     console.log(req.params);
-    conn.query('SELECT * FROM goods WHERE slug="' + req.params['0'] + '"', function (error, result, fields) {
+    conn.query('SELECT * FROM goods WHERE slug="' + req.params['0'] + '"',  (error, result, fields)=> {
         if (error) throw error;
         console.log(result);
         result = JSON.parse(JSON.stringify(result));
-        console.log(result[0]['slug']);
-        res.end("ok");
-        // res.render('goods.pug',
-        //     { goods: JSON.parse(JSON.stringify(result)) });
+        console.log(result[0]['id']);
+        conn.query('SELECT * FROM images_goods WHERE goods_id=' + result[0]['id'] ,  (error, goodsImages, fields)=> {
+            if (error) throw error;
+            goodsImages =JSON.parse(JSON.stringify(goodsImages));
+            console.log(goodsImages);
+             res.render('goods.pug',
+                {
+                    goods: result,
+                    goods_images:goodsImages
+                });
+        });
     });
 });
 //!part order

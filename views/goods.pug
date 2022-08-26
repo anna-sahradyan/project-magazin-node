@@ -13,6 +13,15 @@ div(class='wrap')
                     src="/e-commerce/"+goods[0]['image']
                     class="goods-big-image"
                     )
+                    div(class='row')
+                        each val,index in goods_images
+                          div(class="col col-md-6")
+                            img(
+                              src="/e-commerce/" + val['path']
+                              class="goods-little-image"
+                            )
+
+
                 div(class="col col-md-8")
                     p #{goods[0]["description"]}
                     span(class="success") Cost:#{goods[0]["cost"].toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")}USD
